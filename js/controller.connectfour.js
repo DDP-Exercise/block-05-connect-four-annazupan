@@ -69,13 +69,21 @@ const controller = {
                 });
             });
         }
-        const resetBtn = document.querySelector("button");
+        const resetBtn = document.getElementById("reset-button");
         resetBtn.addEventListener("click", () => {
             model.resetGame();
         });
+
+        const startBtn = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+
+        if (startBtn) {
+            startBtn.addEventListener("click", () => {
+                startScreen.classList.add("hidden");
+            });
+        }
     }
 };
 window.addEventListener("load", () => {
     controller.init();
-    alert("Candace VS Vanessa! May the best win!" + " Candace begins!")
 });
