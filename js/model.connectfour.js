@@ -19,7 +19,6 @@
 //      that, when called, dispatches the event. Nothing else should
 //      happen in those methods.
 
-
 //TODO: Initiate the battlefield. Your model needs a representation of the
 //      battlefield as data (two-dimensional array). Obviously, there are
 //      no stones yet in the field.
@@ -37,3 +36,156 @@
 //      to your custom event.
 
 //TODO: Method to change the current player (and dispatch the according event).
+
+export let model = {
+    players: ["Candace", "Vanessa"],
+    currentPlayer: "Candace",
+    gameOver: false,
+    winner: "",
+    winningStones: [],
+    battleField: [
+        ["", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""],
+        ["", "", "", "", "", "", ""]
+    ],
+
+    dispatchPlayerChange: function () {
+        window.dispatchEvent(new CustomEvent("c4:playerChange"));
+    },
+
+    dispatchStoneInserted: function () {
+        window.dispatchEvent(new CustomEvent("c4:insertStone"));
+    },
+
+    insertStone: function (columnIndex) {
+        if (this.gameOver) return;
+
+        let stonePlaced = false;
+
+        for (let i = 5; i >= 0; i--) {
+            if (this.battleField[i][columnIndex] === "") {
+                this.battleField[i][columnIndex] = this.currentPlayer;
+                stonePlaced = true;
+
+                this.dispatchStoneInserted();
+                this.checkWin();
+
+                if (!this.gameOver) {
+                    this.playerChange();
+                }
+                break;
+            }
+        }
+
+        if (stonePlaced === false) {
+            window.dispatchEvent(new CustomEvent("c4:columnFull"));
+        }
+    },
+
+    playerChange: function () {
+        this.currentPlayer = (this.currentPlayer === "Candace") ? "Vanessa" : "Candace";
+        this.dispatchPlayerChange();
+    },
+
+    checkWin: function () {
+        let p = this.currentPlayer;
+
+        for (let r = 0; r < 6; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (this.battleField[r][c] === p &&
+                    this.battleField[r][c + 1] === p &&
+                    this.battleField[r][c + 2] === p &&
+                    this.battleField[r][c + 3] === p) {
+                    this.triggerWin(p, [[r, c], [r, c + 1], [r, c + 2], [r, c + 3]]);
+                    return;
+                }
+            }
+        }
+
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 7; c++) {
+                if (this.battleField[r][c] === p &&
+                    this.battleField[r + 1][c] === p &&
+                    this.battleField[r + 2][c] === p &&
+                    this.battleField[r + 3][c] === p) {
+                    this.triggerWin(p, [[r, c], [r + 1, c], [r + 2, c], [r + 3, c]]);
+                    return;
+                }
+            }
+        }
+
+        for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (this.battleField[r][c] === p &&
+                    this.battleField[r + 1][c + 1] === p &&
+                    this.battleField[r + 2][c + 2] === p &&
+                    this.battleField[r + 3][c + 3] === p) {
+                    this.triggerWin(p, [[r, c], [r + 1, c + 1], [r + 2, c + 2], [r + 3, c + 3]]);
+                    return;
+                }
+            }
+        }
+
+        for (let r = 3; r < 6; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (this.battleField[r][c] === p &&
+                    this.battleField[r - 1][c + 1] === p &&
+                    this.battleField[r - 2][c + 2] === p &&
+                    this.battleField[r - 3][c + 3] === p) {
+                    this.triggerWin(p, [[r, c], [r - 1, c + 1], [r - 2, c + 2], [r - 3, c + 3]]);
+                    return;
+                }
+            }
+        }
+
+        let isDraw = true;
+        for (let c = 0; c < 7; c++) {
+            if (this.battleField[0][c] === "") {
+                isDraw = false;
+                break;
+            }
+        }
+
+        if (isDraw) {
+            this.gameOver = true;
+            window.dispatchEvent(new CustomEvent("c4:gameOver", {
+                detail: { winner: "draw" }
+            }));
+        }
+    },
+
+    triggerWin: function(winner, winningCells) {
+        this.gameOver = true;
+        this.winner = winner;
+        this.winningStones = winningCells;
+
+        window.dispatchEvent(new CustomEvent("c4:win", {
+            detail: {
+                winner: winner,
+                cells: winningCells
+            }
+        }));
+    },
+
+    resetGame: function() {
+        this.battleField = [
+            ["", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", ""]
+        ];
+
+        this.currentPlayer = "Candace";
+        this.gameOver = false;
+        this.winner = "";
+        this.winningStones = [];
+
+        window.dispatchEvent(new CustomEvent("c4:gameReset"));
+        this.dispatchPlayerChange();
+    },
+};

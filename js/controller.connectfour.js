@@ -1,5 +1,9 @@
 "use strict";
 
+import { model } from './model.connectfour.js';
+import { view } from './view.polished.js';
+
+
 /*******************************************************
  *     Connect Four - 100p
  *
@@ -37,7 +41,7 @@
  *
  *     The creation of this game should take you somewhere between
  *     8-10 hours of concentrated work.
- *     Bratlsoft - 2026-04-29
+ *     Anna Zupan - 2026-05-10
  *******************************************************/
 
 
@@ -45,3 +49,41 @@
 //      the view (or views, if you decide to make a console-view).
 
 //TODO: Add EventListeners, to forward the user inputs to the model.
+
+const controller = {
+    init: function() {
+        if (typeof view != 'undefined') {
+            view.init();
+        }
+        this.addEventListeners();
+    },
+
+    addEventListeners: function() {
+        for (let i = 1; i <= 7; i++) {
+
+            const columnCells = document.querySelectorAll(".cell-" + i);
+
+            columnCells.forEach(cell => {
+                cell.addEventListener("click", () => {
+                    model.insertStone(i - 1);
+                });
+            });
+        }
+        const resetBtn = document.getElementById("reset-button");
+        resetBtn.addEventListener("click", () => {
+            model.resetGame();
+        });
+
+        const startBtn = document.getElementById("start-button");
+        const startScreen = document.getElementById("start-screen");
+
+        if (startBtn) {
+            startBtn.addEventListener("click", () => {
+                startScreen.classList.add("hidden");
+            });
+        }
+    }
+};
+window.addEventListener("load", () => {
+    controller.init();
+});
